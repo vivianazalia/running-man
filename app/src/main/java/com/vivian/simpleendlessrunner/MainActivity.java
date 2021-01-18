@@ -4,6 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -13,6 +16,11 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
+import android.graphics.fonts.Font;
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -23,6 +31,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.Toast;
 
 import java.io.Console;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,12 +67,14 @@ public class MainActivity extends Activity {
         MainMenu mainMenu;
         Credit credit;
         Tutorial tutorial;
+        SoundPool bgm;
 
         boolean gameOver = false;
 
         private int score = 0;
         private int highScore = 0;
         long startTime = 0;
+        int soundID = 1;
 
         Bitmap bg, bgMainMenu, playBtn, creditBtn, quitBtn, backBtn, tutorialBtn, pauseBtn, resumeBtn;
         Bitmap bmCharacter, tileGround, mosnterLand, monsterAir, charaJump, charaCrouch;
@@ -113,9 +124,9 @@ public class MainActivity extends Activity {
             tutorialScene = Bitmap.createScaledBitmap(tutorialScene, size.x, size.y, true);
             pauseBtn = Bitmap.createScaledBitmap(pauseBtn, 105, 99, true);
             tileGround = Bitmap.createScaledBitmap(tileGround, size.x/10, 100, true);
-            resumeBtn = Bitmap.createScaledBitmap(resumeBtn, 300, 91, true);
-            mainmenuBtn = Bitmap.createScaledBitmap(mainmenuBtn, 300, 91, true);
-            restartBtn = Bitmap.createScaledBitmap(restartBtn, 300, 91, true);
+            resumeBtn = Bitmap.createScaledBitmap(resumeBtn, (int) (size.x / 4.5f), size.y / 7, true);
+            mainmenuBtn = Bitmap.createScaledBitmap(mainmenuBtn, (int) (size.x / 4.5f), size.y / 7, true);
+            restartBtn = Bitmap.createScaledBitmap(restartBtn, (int) (size.x / 4.5f), size.y / 7, true);
 
             mainMenu = new MainMenu(bgMainMenu, playBtn, creditBtn, quitBtn, tutorialBtn, size.x, size.y);
             credit = new Credit(creditScene, backBtn, size.x, size.y);
@@ -129,6 +140,8 @@ public class MainActivity extends Activity {
             mainMenuButton = new RectF(size.x / 2, size.y / 2, size.x / 2 + mainmenuBtn.getWidth(), size.y / 2 + mainmenuBtn.getHeight());
             pauseButton = new RectF(size.x - 200, 100, size.x - pauseBtn.getWidth(), 100 + pauseBtn.getHeight());
             resumeButton = new RectF(size.x / 2 - 400, size.y / 2, size.x / 2 - 400 + resumeBtn.getWidth(), size.y / 2 + resumeBtn.getHeight());
+
+            playSound();
 
             playing = true;
         }
@@ -152,6 +165,17 @@ public class MainActivity extends Activity {
             }
         }
 
+        public void playSound(){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                bgm = new SoundPool.Builder().setMaxStreams(1).build();
+            } else {
+                bgm = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+            }
+
+            soundID = bgm.load("app/src/main/assets/bgm.wav", 0);
+            bgm.play(soundID, 1, 1, 0,-1, 1);
+        }
+
         public void draw() {
             if (ourHolder.getSurface().isValid()) {
                 canvas = ourHolder.lockCanvas();
@@ -159,7 +183,6 @@ public class MainActivity extends Activity {
                 canvas.drawColor(Color.argb(255, 26, 128, 182));
 
                 paint.setColor(Color.argb(255, 249, 129, 0));
-                paint.setTextSize(45);
 
                 //draw main menu
                 if (state == State.STATE.MENU){
@@ -184,33 +207,36 @@ public class MainActivity extends Activity {
                     paint.setColor(Color.argb(255, 210, 129, 100));
                     endlessMonster.drawObject(canvas, paint);
 
+                    paint.setTextSize(70);
                     //draw score
-                    canvas.drawText("Score: " + score, (float)size.x / 2, 80, paint);
+
+                    canvas.drawText("Score: " + score, (float)size.x / 2, 150, paint);
 
                     //draw highscore
-                    canvas.drawText("Highscore: " + highScore, (float) size.x / 4, 80, paint);
+                    canvas.drawText("Highscore: " + highScore, (float) size.x / 4, 150, paint);
                 }
 
                 if (state == State.STATE.PAUSE){
                     canvas.drawBitmap(bg, 0, 0, paint);
-                    paint.setTextSize(70);
-                    canvas.drawText("PAUSE", (float) ((size.x / 2) - 150), (float) size.y / 2 - 100, paint);
-                    canvas.drawBitmap(resumeBtn, size.x/2 - 400, size.y/2, paint);
-                    canvas.drawBitmap(mainmenuBtn, size.x/2, size.y/2, paint);
+                    paint.setTextSize(150);
+                    canvas.drawText("PAUSE", (float) ((size.x / 2) - 250), (float) size.y / 2 - 100, paint);
+                    canvas.drawBitmap(resumeBtn, size.x/2 - 600, size.y/2 + 30, paint);
+                    canvas.drawBitmap(mainmenuBtn, size.x/2, size.y/2 + 30, paint);
                 }
 
                 //draw gameover panel
                 if (gameOver && state == State.STATE.GAMEOVER){
                     canvas.drawBitmap(bg, 0, 0, paint);
+                    paint.setTextSize(70);
                     //draw highscore
-                    canvas.drawText("Highscore: " + highScore, (float) size.x / 2 - 170, 80, paint);
+                    canvas.drawText("Highscore: " + highScore, (float) size.x / 2 - 200, 150, paint);
 
                     //draw text gameover
-                    paint.setTextSize(70);
-                    canvas.drawText("GAME OVER", (float) ((size.x / 2) - 230), (float) size.y / 2 - 100, paint);
-                    canvas.drawBitmap(restartBtn, size.x/2 - 400, size.y/2, paint);
+                    paint.setTextSize(150);
+                    canvas.drawText("GAME OVER", (float) ((size.x / 2) - 450), (float) size.y / 2 - 100, paint);
+                    canvas.drawBitmap(restartBtn, size.x/2 - 600, size.y/2 + 30, paint);
                     //canvas.drawRect(restartButton,paint);
-                    canvas.drawBitmap(mainmenuBtn, size.x/2, size.y/2, paint);
+                    canvas.drawBitmap(mainmenuBtn, size.x/2, size.y/2 + 30, paint);
                 }
 
                 //draw credit panel
@@ -238,13 +264,14 @@ public class MainActivity extends Activity {
             }
 
             for (int i = 0; i < endlessMonster.getList().size(); i++){
-                if (RectF.intersects(character.getRect(), endlessMonster.getRect(i))){
+                if (RectF.intersects(character.getCollider(), endlessMonster.getRect(i))){
                     gameOver = true;
                     state = State.STATE.GAMEOVER;
                     if (score >= highScore){
                         highScore = score;
                     }
                     resetScore();
+                    character.resetState();
                 }
             }
 
@@ -306,7 +333,7 @@ public class MainActivity extends Activity {
                         state = State.STATE.MENU;
                     }
 
-                    if (pauseButton.contains(x1, y1)){
+                    if (pauseButton.contains(x1, y1) && state == State.STATE.GAMEPLAY){
                         state = State.STATE.PAUSE;
                     }
 
@@ -342,18 +369,17 @@ public class MainActivity extends Activity {
                         if(y2 > y1){
                             //nunduk jika di tanah
                             if (!character.getIsCrouching()){
-                                character.resetCrouchForce();
+                                //character.resetCrouchForce();
                                 character.setIsCrouching(true);
                             }
                         } else{ //top swipe
                             //lompat
                             if (!character.getIsJumping()){
-                                character.resetJumpForce();
+                                //character.resetJumpForce();
                                 character.setIsJumping(true);
                             }
                         }
                     }
-                    //isMoving = false;
                     break;
             }
 

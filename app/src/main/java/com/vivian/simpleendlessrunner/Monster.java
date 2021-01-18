@@ -9,6 +9,7 @@ import android.graphics.RectF;
 public class Monster {
     private RectF whereToDraw;
     private Rect frameToDraw;
+    private RectF collider;
     Bitmap img;
     private long lastFrameChangeTime = 0;
     private int frameLengthInMilliseconds = 100;
@@ -19,7 +20,6 @@ public class Monster {
     private int frameHeight;
 
     public Monster(Bitmap _img, int _frameCount, float x, int y, int _frameWidth, int _frameHeight){
-        //width = _width;
         frameCount = _frameCount;
         frameWidth = _frameWidth;
         frameHeight = _frameHeight;
@@ -29,6 +29,7 @@ public class Monster {
 
         whereToDraw = new RectF(x, y, x + img.getWidth(), y + img.getHeight());
         frameToDraw = new Rect(0,0, frameWidth, frameHeight);
+        collider = new RectF(x + 60, y + 30, x + (img.getWidth() - 130), y + 100);
     }
 
     public void getCurrentFrame() {
@@ -46,12 +47,16 @@ public class Monster {
     }
 
     public void drawMonster(Canvas canvas, Paint paint){
-        getCurrentFrame();;
-        canvas.drawBitmap(img, frameToDraw, whereToDraw, paint);
+        getCurrentFrame();
+        canvas.drawBitmap(img, frameToDraw, whereToDraw, null);
     }
 
     public RectF getRect(){
         return whereToDraw;
+    }
+
+    public RectF getCollider(){
+        return collider;
     }
 
     public float getWidth(){

@@ -18,14 +18,14 @@ public class Credit {
         bg = _bg;
         bg = Bitmap.createScaledBitmap(bg, screenX, screenY, true);
         backBtn = _backBtn;
-        backBtn = Bitmap.createScaledBitmap(backBtn, 300, 91, true);
+        backBtn = Bitmap.createScaledBitmap(backBtn, (int) (screenX / 4.5f), screenY / 7, true);
 
-        backButton = new RectF(30, screenY - 120, 30 + backBtn.getWidth(), (screenY - 120) + backBtn.getHeight());
+        backButton = new RectF(30, screenY - 180, 30 + backBtn.getWidth(), (screenY - 180) + backBtn.getHeight());
     }
 
     public void draw(Canvas canvas, Paint paint){
         canvas.drawBitmap(bg, 0,0, paint);
-        canvas.drawBitmap(backBtn, 30, screenY - 120, paint);
+        canvas.drawBitmap(backBtn, 30, screenY - 180, paint);
     }
 
     public RectF getBackButton(){

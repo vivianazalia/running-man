@@ -12,6 +12,7 @@ public class MainMenu {
     int screenX, screenY;
     RectF playBtn, creditBtn, quitBtn, tutorialBtn;
     int posXFirst, posXSecond;
+    int buttonHeight, buttonWidth;
 
     Bitmap bg, play, credit, quit, tutorial;
 
@@ -19,33 +20,36 @@ public class MainMenu {
         screenX = _screenX;
         screenY = _screenY;
 
+        buttonHeight = screenY / 7;
+        buttonWidth = (int) (screenX / 4.5f);
+
         bg = _bg;
         bg = Bitmap.createScaledBitmap(bg, screenX, screenY, true);
 
         play = _play;
-        play = Bitmap.createScaledBitmap(play, 300, 91,true);
+        play = Bitmap.createScaledBitmap(play, buttonWidth, buttonHeight,true);
         credit = _credit;
-        credit = Bitmap.createScaledBitmap(credit, 300, 91, true);
+        credit = Bitmap.createScaledBitmap(credit, buttonWidth, buttonHeight, true);
         tutorial = _tutorial;
-        tutorial = Bitmap.createScaledBitmap(tutorial, 300, 91, true);
+        tutorial = Bitmap.createScaledBitmap(tutorial, buttonWidth, buttonHeight, true);
         quit = _quit;
-        quit = Bitmap.createScaledBitmap(quit, 300, 91, true);
+        quit = Bitmap.createScaledBitmap(quit, buttonWidth, buttonHeight, true);
 
         posXFirst = screenX/4;
         posXSecond = screenX/2;
 
-        playBtn = new RectF(posXFirst, 300, posXFirst + play.getWidth(), 300 + play.getHeight());
-        tutorialBtn = new RectF(posXSecond, 300, posXSecond + tutorial.getWidth(), 300 + tutorial.getHeight());
-        creditBtn = new RectF(posXFirst, 450, posXFirst + credit.getWidth(), 450 + credit.getHeight());
-        quitBtn = new RectF(posXSecond, 450, posXSecond + quit.getWidth(), 450 + quit.getHeight());
+        playBtn = new RectF(posXFirst, screenY/2 - buttonHeight + 70, posXFirst + play.getWidth(), screenY/2 - buttonHeight + 70 + play.getHeight());
+        tutorialBtn = new RectF(posXSecond, screenY/2 - buttonHeight + 70, posXSecond + tutorial.getWidth(), screenY/2 - buttonHeight + 70 + tutorial.getHeight());
+        creditBtn = new RectF(posXFirst, screenY/2 + 140, posXFirst + credit.getWidth(), screenY/2 + 140 + credit.getHeight());
+        quitBtn = new RectF(posXSecond, screenY/2 + 140, posXSecond + quit.getWidth(), screenY/2 + 140 + quit.getHeight());
     }
 
     public void draw(Canvas canvas, Paint paint){
         canvas.drawBitmap(bg, 0,0, paint);
-        canvas.drawBitmap(play, posXFirst, 300, paint);
-        canvas.drawBitmap(tutorial, posXSecond, 300, paint);
-        canvas.drawBitmap(credit, posXFirst, 450, paint);
-        canvas.drawBitmap(quit, posXSecond, 450, paint);
+        canvas.drawBitmap(play, posXFirst, screenY/2 - buttonHeight + 70, paint);
+        canvas.drawBitmap(tutorial, posXSecond, screenY/2 - buttonHeight + 70, paint);
+        canvas.drawBitmap(credit, posXFirst, screenY/2 + 140, paint);
+        canvas.drawBitmap(quit, posXSecond, screenY/2 + 140, paint);
     }
 
     public RectF getPlayButton(){

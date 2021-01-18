@@ -37,7 +37,7 @@ public class EndlessMonster implements Endlessable{
     private Monster createMonster(){
         int i = rand.nextInt(2);
         if (i == 0){
-            return new Monster(monsterLand, 4, getPosition(), screenY - 160, 50, 100);
+            return new Monster(monsterLand, 4, getPosition(), screenY - 160, 50, 110);
         } else {
             return new Monster(monsterAir, 8, getPosition(), screenY - 380, 20, 110);
         }
@@ -52,7 +52,6 @@ public class EndlessMonster implements Endlessable{
     public void drawObject(Canvas c, Paint p){
         for (int i = 0; i < monsters.size(); i++){
             monsters.get(i).drawMonster(c, p);
-            //c.drawRect(monsters.get(i).getRect(), p);
         }
     }
 
@@ -61,7 +60,7 @@ public class EndlessMonster implements Endlessable{
     }
 
     public RectF getRect(int index){
-        return monsters.get(index).getRect();
+        return monsters.get(index).getCollider();
     }
 
     public void update(){
@@ -69,12 +68,17 @@ public class EndlessMonster implements Endlessable{
         if (!monsters.isEmpty()){
             for (int i = 0; i < monsters.size(); i++){
                 monsters.get(i).getRect().left -= speed;
-                monsters.get(i).getRect().right = monsters.get(i).getRect().left + monsters.get(i).getWidth();
+                monsters.get(i).getCollider().left -= speed;
+                monsters.get(i).getRect().right = (monsters.get(i).getRect().left + monsters.get(i).getWidth());
+                monsters.get(i).getCollider().right = monsters.get(i).getCollider().left + monsters.get(i).getWidth() - 130;
             }
 
             if (monsters.get(0).getRect().right < 0){
-                monsters.get(0).getRect().left = getPosition();
-                monsters.get(0).getRect().right = monsters.get(0).getRect().left + monsters.get(0).getWidth();
+                float position = getPosition();
+                monsters.get(0).getRect().left = position;
+                monsters.get(0).getCollider().left = position + 60;
+                monsters.get(0).getRect().right = (monsters.get(0).getRect().left + monsters.get(0).getWidth());
+                monsters.get(0).getCollider().right = monsters.get(0).getCollider().left + monsters.get(0).getWidth() - 130;
                 monsters.add(monsters.get(0));
                 monsters.remove(monsters.get(0));
             }
@@ -82,20 +86,10 @@ public class EndlessMonster implements Endlessable{
     }
 
     private float getPosition(){
-        /*if (monsters.isEmpty() || monsters.get(monsters.size() - 1).getRect().left < screenX){
-            //xPos = (float) (screenX + Math.random() * 500);
-            xPos = (float) (screenX + rand.nextInt(500));
-        } else if (monsters.get(monsters.size() - 1).getRect().left >= screenX){
-            //xPos = (float) (monsters.get(monsters.size() - 1).getRect().right + 400 + Math.random() * 300);
-            xPos = (float) (monsters.get(monsters.size() - 1).getRect().right + 400 + Math.random() * 300);
-        } else {
-            xPos = (float) (screenX + Math.random() * 800);
-        }*/
-
         if (monsters.isEmpty()){
-            xPos = (float)(screenX + 400 + rand.nextInt(500));
+            xPos = (float) (screenX + 400 + rand.nextInt(500));
         } else {
-            xPos = (float)(monsters.get(monsters.size() - 1).getRect().right + 400 + rand.nextInt(500));
+            xPos = (float) (monsters.get(monsters.size() - 1).getRect().right + 400 + rand.nextInt(500));
         }
         return xPos;
     }

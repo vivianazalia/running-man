@@ -22,16 +22,16 @@ public class Character {
     private int frameHeight = 200;
     private int frameCount = 8;
 
-    private float jumpForce;
-    private float crouchForce;
-    private boolean isJumping;
-    private boolean isGrounded;
-    private boolean isCrouching;
+    private float jumpForce = -10;
+    private boolean isJumping = false;
+    private boolean isCrouching = false;
 
     private Rect frameToDraw;
     private long lastFrameChangeTime = 0;
     private int frameLengthInMilliseconds = 100;
     private int currentFrame = 0;
+
+    private RectF collider;
 
     //Constructor Character class
     public Character(Bitmap _idle, Bitmap _jump, Bitmap _crouch, int x, int y, int _screenX, int _screenY){
@@ -45,6 +45,7 @@ public class Character {
 
         pos = new RectF(x, y - frameHeight, x + frameWidth, y);
         frameToDraw = new Rect(0, 0, frameWidth, frameHeight);
+        collider = new RectF(x + 50, y - frameHeight, (x + 50) + frameWidth - 70, y);
 
         screenX = _screenX;
         screenY = _screenY;
@@ -54,13 +55,13 @@ public class Character {
         getCurrentFrame();
         if (isJumping){
             frameCount = 7;
-            canvas.drawBitmap(jump, frameToDraw, pos, paint);
+            canvas.drawBitmap(jump, frameToDraw, pos, null);
         } else if (isCrouching){
             frameCount = 5;
-            canvas.drawBitmap(crouch, frameToDraw , pos, paint);
+            canvas.drawBitmap(crouch, frameToDraw , pos, null);
         } else {
             frameCount = 8;
-            canvas.drawBitmap(idle, frameToDraw , pos, paint);
+            canvas.drawBitmap(idle, frameToDraw, pos, null);
         }
     }
 
@@ -78,34 +79,33 @@ public class Character {
         frameToDraw.right = frameToDraw.left + frameWidth;
     }
 
-    public RectF getRect(){
-        return pos;
+    public RectF getCollider(){
+        return collider;
     }
 
     public void update(){
-        jump();
-        if (isGrounded){
+        if (isJumping){
+            jump();
+        } else if (isCrouching){
             crouch();
         }
     }
 
     public void jump() {
-        if (pos.bottom >= screenY - 100){
+        if (collider.bottom >= screenY - 100){
+            currentFrame = 0;
+            collider.bottom -= 150;
+        } else if (collider.bottom < screenY - 100 && currentFrame >= frameCount - 1){
+            collider.bottom = screenY - 100;
+            pos.top = screenY - frameHeight - 100;
             pos.bottom = screenY - 100;
+            jumpForce = -10;
             isJumping = false;
-            isGrounded = true;
-        } else {
+        } else if (collider.bottom < screenY - 100){
             jumpForce += GRAVITY;
             pos.top += jumpForce;
-            pos.bottom = pos.top + frameHeight;
-            isGrounded = false;
+            pos.bottom = pos.top + jump.getHeight();
         }
-    }
-
-    public void resetJumpForce(){
-        jumpForce = -15;
-        pos.top += jumpForce;
-        pos.bottom = pos.top + frameHeight;
     }
 
     public void setIsJumping(boolean b){
@@ -117,19 +117,14 @@ public class Character {
     }
 
     public void crouch(){
-        if (pos.top <= screenY - frameHeight - 100){
-            pos.top = screenY - frameHeight - 100;
-            isCrouching = false;
-        } else {
-            crouchForce -= GRAVITY;
-            pos.top += crouchForce;
+        if (collider.top <= screenY - frameHeight - 100){
+            currentFrame = 0;
+            collider.top += 150;
             isCrouching = true;
+        } else if (collider.top > screenY - frameHeight -100 && currentFrame >= frameCount - 1){
+            collider.top = screenY - frameHeight - 100;
+            isCrouching = false;
         }
-    }
-
-    public void resetCrouchForce(){
-        crouchForce = 12;
-        pos.top += crouchForce;
     }
 
     public void setIsCrouching(boolean b){
@@ -138,6 +133,11 @@ public class Character {
 
     public boolean getIsCrouching(){
         return isCrouching;
+    }
+
+    public void resetState(){
+        isJumping = false;
+        isCrouching = false;
     }
 
 }
